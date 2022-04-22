@@ -1,0 +1,7 @@
+02.02.21
+The two files currently named: scalarPSFnew.m and vectorialPSFnew.m were originally named
+scalarPSF.m and vectorialPSF.m
+There is a problem in compiling the c-codes in the subfolder mex so both files had to be renamed this
+way for the system to use scalarPSF.mexw64 and vectorialPSFnew.mexw64 instead of the m. files
+There has been an unexplained error in the c-compiler of this laptop and has given a lot of trouble.
+This renaming files seem to be the solution for now.

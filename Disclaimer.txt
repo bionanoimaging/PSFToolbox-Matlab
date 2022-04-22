@@ -1,0 +1,4 @@
+[Example of disclaimer]
+This software has neither been tested nor approved for clinical use or for incorporation in a medical 
+device. It is the user’s responsibility to comply with any applicable local, state, national or 
+international regulations.
