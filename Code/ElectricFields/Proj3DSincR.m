@@ -20,16 +20,27 @@ function [amp3d,h]=Proj3DSincR(ImageParam,PSFParam,FPlane,BorderRegion)
     myzz=zz(ImageParam.Size);
     myrr=rrscale(ImageParam.Size,ImageParam.Sampling *2*pi/(PSFParam.lambdaEm/PSFParam.n)); % This is in real space
     amp3d=sinc(myrr); % sinc is sin(pi x) /(pi x)
-    % Edit Dina 03.08.21 -----------------------------
-    Radius=1/3*ImageParam.Size(1);
-    Disc = disk(ImageParam.Size(1:2),[0 0],Radius);
-    amp3d=amp3d.*Disc; % limit the sinc by a disc of radius equal to (2/3)*bigsize (real space)
+    % Edit Dina 17.06.22 -----------------------------
+%     Radius=(ImageParam.Size(1)./(1+BorderRegion))./2;
+%     Disc = disk(ImageParam.Size(1:2),[0 0],Radius);
+%     amp3d=amp3d.*Disc; % limit the sinc by a disc of radius equal to (2/3)*bigsize (real space)
     % end edit ------------------------------------------
+
+    % Edit Dina 26.05.22 -----------------------------
+%     Radius=1/2*ImageParam.Size(1);
+%     Radius=ImageParam.Size(1:2)./(1+BorderRegion);%BorderRegion*ImageParam.Size(1:2);
+%     Rec=extract(newim(round(Radius))+1,ImageParam.Size(1:2));
+%     amp3d=amp3d.*Rec; % limit the sinc by a disc of radius equal to (2/3)*bigsize (real space)
+    % end edit ------------------------------------------
+    
     % The below approaches destoy the uniform brightness property and should NOT be used!
     % amp3d=DampEdge(amp3d,0.1,2,0,1);
     % amp3d=DampEdge(amp3d,BorderRegion,3,1,3);
     % amp3d=DampEdge(amp3d,BorderRegion,3,1,1);   % dimming down to zero seems a good choice here and creates less artefacts.
+    % START
     ftAmp=ft3d(amp3d);  % 3D shell
+%     ftAmp=
+    % END
     if KZExtent > ImageParam.Size(3)/2-1
         fprintf('k-Sphere kZ extent: %g, Sampling Limit Z: %g\n',KZExtent,floor(ImageParam.Size(3)/2-1));
         fprintf('Warning!! kZ sphere is undersampled, but the final intensity OTF will still be OK\n');

@@ -50,10 +50,10 @@ midZ = floor(ImageParam.Size(3)/2);
 Xi = 1.0-(zz([1 1 ImageParam.Size(3)],'freq')+0.5)*(1-cosAlpha); % is cos(theta) 
 Xi = Xi - (1.0-Xi(2))/4.5;  % seems to be a good compromize to reduce the error
 
-Xi=permute(expanddim(dip_image(cos(linspace(0,asin(PSFParam.NA/PSFParam.n), 3.*ImageParam.Size(3)))),3),[3 2 1]);
-Xi=Xi(:,:,end:-1:0);
-% Xi=(Xi-min(Xi)).*((1-cosAlpha)./(max(Xi)-min(Xi)))+cosAlpha;
-XiStep=mean(abs(Xi(:,:,1:end)-Xi(:,:,0:end-1)));
+% Xi=permute(expanddim(dip_image(cos(linspace(0,asin(PSFParam.NA/PSFParam.n), 3.*ImageParam.Size(3)))),3),[3 2 1]);
+% Xi=Xi(:,:,end:-1:0);
+% % Xi=(Xi-min(Xi)).*((1-cosAlpha)./(max(Xi)-min(Xi)))+cosAlpha;
+% XiStep=mean(abs(Xi(:,:,1:end)-Xi(:,:,0:end-1)));
 % Xi=linspace(cosAlpha,1,ImageParam.Size(3));
 % Xi=permute(expanddim(dip_image(Xi),3),[3 2 1]);
 
@@ -69,8 +69,9 @@ FT_I0 = sqrtXi * (1+Xi) * besselj(0,BesselArg);
 FT_I1 = sqrtXi * sinTheta * besselj(1,BesselArg);
 FT_I2 = sqrtXi * (1-Xi) * besselj(2,BesselArg);
 
-scale = 3*lambda / ImageParam.Sampling(3)/ abs(double(squeeze(Xi(end)-Xi(0))));%(1-cosAlpha);%-XiStep);
+% scale = 3*lambda / ImageParam.Sampling(3)/ abs(double(squeeze(Xi(end)-Xi(0))));%(1-cosAlpha);%-XiStep);
 % scale=lambda / ImageParam.Sampling(3);
+scale = lambda / ImageParam.Sampling(3) / (1-cosAlpha);
 I0 = czt_z(FT_I0,scale); I1 = czt_z(FT_I1,scale); I2 = czt_z(FT_I2,scale);   % 1D FFTs along Z.
 
 if ~isfield(PSFParam,'polarization') 

@@ -17,6 +17,7 @@ function xout = czt(xin, scale, dims)
     end
     xout = xin; 
     for d = 1:length(dims)
+        
         xout = czt_1d(xout, scale(d), dims(d));
     end
 end

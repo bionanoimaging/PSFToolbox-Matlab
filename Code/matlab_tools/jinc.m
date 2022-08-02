@@ -31,4 +31,8 @@ if nargin < 2
 end
 myradius=pi*rrscale(mysize,myscales);
 res=besselj(1,2*myradius) / (myradius);
-res(MidPosX(res),MidPosY(res))=1;
+if length(size(res))==1 % edit 08.07.22 Dina
+    res(MidPosX(res))=1; % 1 dim
+else
+    res(MidPosX(res),MidPosY(res))=1;
+end

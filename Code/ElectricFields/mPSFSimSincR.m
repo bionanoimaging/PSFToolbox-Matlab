@@ -43,21 +43,21 @@ else
 end
 
 if ~isfield(PSFParam,'Aplanatic')
-    PSFParam.Aplanatic = 1;  % 1 means emission the intensity is scaled by cos(theta) and the electric field is scaled by sqrt(cos(theta)), 0: no aplanatic factor, updated today 29.06.21
+    PSFParam.Aplanatic = -1;  % 1 means emission the intensity is scaled by cos(theta) and the electric field is scaled by sqrt(cos(theta)), 0: no aplanatic factor, updated today 29.06.21
 end
 
 if nargin < 3
     doExtend=1;
 end
 
-BorderFraction=0.1;  % not needed any longer
+BorderFraction=0.25;  
 if doExtend
    OrigSize=ImageParam.Size;
    ImageParam.Size=ceil(ImageParam.Size .* (1+BorderFraction));
 end
 
 % Expand the window to avoid FT wrap-around // Edit 03.08.21 
-expw=1;
+expw=0;
 if expw==1 % expand window
     BigImageParam=ImageParam;
     bigsz=2.*ImageParam.Size(1:2);
@@ -70,15 +70,23 @@ else
     InputPol=Make2DPolPhase(BigImageParam,PSFParam);  
 end
 % -- change start -- % Question: why the aplanatic for this function is PSFParam.Aplanatic+1 though?
-if AddPhase~=0 
-    if all(size2d(AddPhase)~=bigsz)
-        AddPhase=real(ift(extract(ft(AddPhase),bigsz)));
-        AddPhase=AddPhase./max(AddPhase);
+
+if iscell(AddPhase)
+    orderlist=AddPhase; clear AddPhase
+    AddPhase=ZernikePoly(orderlist,BigImageParam,PSFParam,0);
+else
+    if AddPhase~=0 
+        if all(size2d(AddPhase)~=bigsz)
+            AddPhase=real(ift(extract(ft(AddPhase),bigsz)));
+            AddPhase=AddPhase./max(AddPhase);
+        end
     end
 end
-% FPlane=SimLens(BFPAperture,PSFParam,ImageParam,aplanar,smoothAperture)  
-FPlane=mSimLens(InputPol,PSFParam,BigImageParam,PSFParam.Aplanatic+1,2,AddParams,AddPhase);  % Circular input polarisation, Emission aplanatic factor, jinc-based-Aperture
-% FPlane=SimLens(InputPol,PSFParam,ImageParam,PSFParam.Aplanatic+2,2);  % compensate for the way that the circular symmetry works in the sincR function
+% % FPlane=SimLens(BFPAperture,PSFParam,ImageParam,aplanar,smoothAperture)  
+% FPlane=mSimLens(InputPol,PSFParam,BigImageParam,PSFParam.Aplanatic+1,2,AddParams,AddPhase);  % Circular input polarisation, Emission aplanatic factor, jinc-based-Aperture
+FPlane=mSimLens(InputPol,PSFParam,BigImageParam,PSFParam.Aplanatic,2,AddParams,AddPhase);  % Circular input polarisation, Emission aplanatic factor, jinc-based-Aperture
+%
+% % FPlane=SimLens(InputPol,PSFParam,ImageParam,PSFParam.Aplanatic+2,2);  % compensate for the way that the circular symmetry works in the sincR function
 % -- end change --
 
 % %FPlane=SimLens(InputPol,PSFParam,ImageParam,PSFParam.Aplanatic,2);  % this can be changed, if the Fourier-space of sincR is FORCED to be uniform (see Pro3DSincR.m) in the projection

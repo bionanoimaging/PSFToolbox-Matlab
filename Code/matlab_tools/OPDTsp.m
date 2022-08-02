@@ -16,7 +16,7 @@
 
 % Dina R - 02.10.21
 % Update - 01.12.21 // tilt is included 
-function [res, tp, ts, angle] = OPDTsp(AddParams,PSFParam,ImageParam)
+function [res, Tp, Ts, angle] = OPDTsp(AddParams,PSFParam,ImageParam)
 
 if length(AddParams.ns)>1
     error('Type of system not allowed. This code can only support one layer of sample.')
@@ -53,7 +53,7 @@ costhetai=kz./ktotal; % angle in the immersion medium in real condition
 sinthetai=sqrt(kxysqr)./ktotal;
 sinbp=sinb.*cosphi - cosb.*sinphi ; % sin(beta-phi) % this term should be -sin(phi) if beta=0
 cosgammai=cosa*costhetai + sina*sinthetai*sinbp; % = costhetai if alpha=0
-singammai=sqrt(1-cosgammai.^2); 
+singammai=real(sqrt(1-cosgammai.^2)); 
 
 [singammas,cosgammas]=SnellLaw(ni,ns,singammai,cosgammai);
 [singammag,cosgammag]=SnellLaw(ni,ng,singammai,cosgammai);
@@ -83,8 +83,8 @@ if nargout>1
     AnglesReal.cosalpha{1}=cosgammas.*Aperture; 
     AnglesReal.cosalpha{2}=cosgammag.*Aperture; 
     AnglesReal.cosalpha{3}=cosgammai.*Aperture;  
-    ts = transmCoeff(listRI,AnglesReal,'s');
-    tp = transmCoeff(listRI,AnglesReal,'p');
+    Ts = transmCoeff(listRI,AnglesReal,'s');
+    Tp = transmCoeff(listRI,AnglesReal,'p');
 end
 
 % ANGLES

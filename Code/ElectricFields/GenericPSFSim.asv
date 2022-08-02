@@ -65,15 +65,15 @@ if nargin<4 || isempty(AddParams) % parameters containing the ri and thicknesses
     AddParams=[];
 end
 
-if nargin<5 || isempty(AddPhase) %|| all(AddPhase==0)
+if nargin<5 || isempty(AddPhase) || all(AddPhase==0)
     PlusPhase=0;
 elseif iscell(AddPhase)
-%     switch Method
-%         case 'CZT'
+    switch Method
+        case 'CZT'
             PlusPhase = AddPhase; %
-%         otherwise
-%             PlusPhase = ZernikePoly(AddPhase,ZoomedImageParam,PSFParam); 
-%     end
+        otherwise
+            PlusPhase = ZernikePoly(AddPhase,ZoomedImageParam,PSFParam); 
+    end
 else
     switch Method
         case 'CZT'
@@ -306,8 +306,8 @@ switch myMode
         LS_PSFParam=PSFParam; % struct('NA',NA_illu,'n',ri,'lambdaEm',lambdaEx);
         LS_PSFParam.LambdaEm = LS_PSFParam.LambdaEx;
         % change Dina 16.12.21 as the next line LS_ImageParam leads to an error
-        %         LS_ImageParam=struct('Sampling',LS_PSFParam.Sampling([1,3,2]),'Size',LS_PSFParam.Size([1,3,2]));  % reaches border at 262 µm
-        LS_ImageParam=struct('Sampling',ImageParam.Sampling([1,3,2]),'Size',ImageParam.Size([1,3,2]));  % reaches border at 262 µm
+        %         LS_ImageParam=struct('Sampling',LS_PSFParam.Sampling([1,3,2]),'Size',LS_PSFParam.Size([1,3,2]));  % reaches border at 262 Âµm
+        LS_ImageParam=struct('Sampling',ImageParam.Sampling([1,3,2]),'Size',ImageParam.Size([1,3,2]));  % reaches border at 262 Âµm
         CalcMethod=Method;%
         LS_PSFParam.Mode='Widefield';
         % end change
