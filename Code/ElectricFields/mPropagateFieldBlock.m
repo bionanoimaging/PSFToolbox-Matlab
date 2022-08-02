@@ -25,7 +25,7 @@
 % This is a modified version of PropagateFieldBlock [edit: 28.06.21 - R. Dina]
 % Aberration due to refractive index mismatch is included
 % ________________________________________________________________________
-function [RPlane,I,Filtered]=mPropagateFieldBlock(APlane,PosMidZ,FPlane,PSFParam,ImageParam,LimitByAperture,AddParams)
+function [RPlane,I,Filtered,Propagator]=mPropagateFieldBlock(APlane,PosMidZ,FPlane,PSFParam,ImageParam,LimitByAperture,AddParams)
 
 if nargin < 6
     LimitByAperture=1;

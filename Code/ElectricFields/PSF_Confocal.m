@@ -15,7 +15,13 @@
 % [h_conf10, OTF_conf10] = PSF_Confocal(ImageParam,PSFParam,1.0,'SlicePropagation');
 %_________________________________________________________________________
 %
-function [h,otf]=PSF_Confocal(ImageParam,PSFParam,Pinholesize,Method, nocheck)
+function [h,otf]=PSF_Confocal(ImageParam,PSFParam,Pinholesize,Method, nocheck,AddParams,AddPhase)
+if nargin<7
+    AddPhase=0;
+end
+if nargin<6
+    AddParams=[];
+end
 if nargin < 3 || isempty(Pinholesize)
     if isfield(PSFParam,'PinholeSize')
         Pinholesize=PSFParam.PinholeSize;  
@@ -39,22 +45,23 @@ else
     PSFParamEx.Aplanatic=1; % excitation
     PSFParamEx.lambdaEm=PSFParam.lambdaEx; % excitation
     PSFParamEx.Mode = 'Widefield';
-    h_ex=squeeze(GenericPSFSim(ImageParam,PSFParamEx,Method,1));
+    h_ex=squeeze(GenericPSFSim(ImageParam,PSFParamEx,Method,AddParams,AddPhase,1));
     PSFParamEm=PSFParam;
     PSFParamEm.Aplanatic=-1; % emission
     PSFParamEm.lambdaEx=PSFParam.lambdaEm; % excitation
     PSFParamEm.Mode = 'Widefield';
-    h_em=squeeze(GenericPSFSim(ImageParam,PSFParamEm,Method,1));
+    h_em=squeeze(GenericPSFSim(ImageParam,PSFParamEm,Method,AddParams,AddPhase,1));
     otf_em=ft(h_em)*sqrt(prod(ImageParam.Size(1:2)));
     AU = 1.22/2.0 * PSFParam.lambdaEm/PSFParam.NA./ImageParam.Sampling(1:2);
     ftradius=Pinholesize*AU;  % pixels in Fourier space (or real space, if starting in Fourier space)
     myscales=ftradius./ImageParam.Size(1:2); 
     ftpinhole=jinc(ImageParam.Size(1:2),myscales);
     pinholeArea=pi*prod(ftradius);
-    ftpinhole=ftpinhole/ftpinhole(MidPosX(ftpinhole),MidPosY(ftpinhole))*pinholeArea
+    ftpinhole=ftpinhole/ftpinhole(MidPosX(ftpinhole),MidPosY(ftpinhole))*pinholeArea;
     % pinhole=real(ift(ftpinhole))/sqrt(prod(mysize));
     h_em_pin=ift(otf_em .* ftpinhole)/sqrt(prod(ImageParam.Size(1:2)));  % convolve with the pinhole
-    h=h_ex .* h_em_pin;
+%     h=h_ex .* h_em_pin;
+    h=h_ex.*abssqr(h_em_pin); % update (Dina) since we are dealing with intensity here; 29-04-22
 end
 
 otf = ft(h) * sqrt(prod(size(h)));

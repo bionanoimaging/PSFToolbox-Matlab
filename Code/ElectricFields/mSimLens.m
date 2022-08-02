@@ -43,12 +43,12 @@
 % This is a modified version of SimLens [edit: 23.08.21 - R. Dina]
 % Aberration due to refractive index mismatch is included
 %_________________________________________________________________________
-function [FPlane,OpticalPathDiff]=mSimLens(BFPAperture,lambdaNA,scales,aplanar,smoothAperture,AddParams,AddPhase)
+function [FPlane,OpticalPathDiff,Ap,kxyz]=mSimLens(BFPAperture,lambdaNA,scales,aplanar,smoothAperture,AddParams,AddPhase)
 if nargin < 7 || isempty(AddPhase)
     AddPhase=0;
 end
 
-if nargin < 6
+if nargin < 5
     smoothAperture=0;
 end
 if isstruct(lambdaNA)  % to enable the alternate usage
@@ -57,24 +57,30 @@ if isstruct(lambdaNA)  % to enable the alternate usage
     if nargin<5 || isempty(smoothAperture)     
         smoothAperture=0;
     end
-    if nargin < 4 || ~isfield(PSFParam,'Aplanatic')
-        aplanar=[];
-    else 
-        aplanar=PSFParam.Aplanatic;
-    end
     if isempty(BFPAperture)
-        BFPAperture=ImageParam.Size(1:2);
+        BFPAperture=Make2DPolPhase(ImageParam,PSFParam); % circular by default
+%         BFPAperture=ImageParam.Size(1:2);
     elseif isvector(BFPAperture) && numel(BFPAperture) == 1
             BFPAperture=newim(ImageParam.Size(1:2))+ BFPAperture;  % BFP Polarization is given by complex number
     end
     scales=ImageParam.Sampling;
 elseif isvector(lambdaNA) % lamba is a vector containg as first element the emission wavelength and second element the NA
-    PSFParam=struct('lambdaEm',lambdaNA(1), 'NA', lambdaNA(2),'n',1); % input lambda and NA are already in the corresponding medium where it should be
+    if length(lambdaNA)==2
+        PSFParam=struct('lambdaEm',lambdaNA(1), 'NA', lambdaNA(2),'n',1); % input lambda and NA are already in the corresponding medium where it should be
+    elseif length(lambdaNA)==3
+        PSFParam.n=lambdaNA(3);
+    end
 end
 
-if nargin<4 || isempty(aplanar)
-    aplanar=0;  % do not use the aplanatic factor
+if isfield(PSFParam,'Aplanatic')
+    aplanar=PSFParam.Aplanatic; % 
+else
+    if nargin<4 || isempty(aplanar)
+        aplanar=-1;  % default corresponds to emission PSF
+    end
+% else the value given under aplanar is considered as the aplanatic factor
 end
+
 if isvector(BFPAperture) % User means size instead of BFP image
     BFPAperture=newim(BFPAperture)+1;  % assumes linear X polarisation only
 end
@@ -94,7 +100,7 @@ end
 % RI and thicknesses data
 % -- start --
 if nargin<6 || isempty(AddParams)  % i.e. if the structure is not given
-    tp=1; ts=1; % transmission coefficients (Fresnel)
+    Tp=1; Ts=1; % transmission coefficients (Fresnel)
     TFactor=1;
     OpticalPathDiff=0;
     AddParams=[]; % for our next reference
@@ -144,8 +150,8 @@ else
     J=1;
 end
 
-cosalpha=kz./ktotal; % angle in the immersion medium in real condition
-sinalpha=sqrt(kxysqr)./ktotal;
+kxyz.kxysqr=kxysqr;
+kxyz.kzsqr=kzsqr;
 
 HardAperture= kxysqr/ktotalsqr < NA*NA;
 if (smoothAperture)
@@ -158,12 +164,25 @@ if (smoothAperture)
 else
     Aperture= HardAperture;
 end
+
+% msk=(kz-kz.*HardAperture)==0;
+% msk2=abs((Aperture./max(Aperture)).*(~msk));
+% kz(~HardAperture)=kz(~HardAperture).*msk2(~HardAperture); % to make the edge smoother (slightly!)
+% kz=kz.*HardAperture;
+cosalpha=kz./ktotal; % angle in the immersion medium in real condition
+sinalpha=sqrt(kxysqr)./ktotal;
+
     
 % calculate the transmission coefficients and optical path difference if there are interfaces
 if ~isempty(AddParams) && isstruct(AddParams)
-        [OpticalPathDiff, tp, ts]=OPDTsp(AddParams,PSFParam,ImageParam); % 
+        [OpticalPathDiff, Tp, Ts]=OPDTsp(AddParams,PSFParam,ImageParam); % 
+        if isfield(AddParams,'OPD') % we only need the Tp and Ts values but we already have the phase covered
+%             if AddParams.OPD~=1
+                OpticalPathDiff=0;
+%             end
+        end
 %     else
-%         [OpticalPathDiff, tp, ts]=OPDDirect(AddParams,ImageParam,PSFParam); % faster than the above // I prefer having two different functions here as it facilitates the job somehow than combining it
+%         [OpticalPathDiff, Tp, Ts]=OPDDirect(AddParams,ImageParam,PSFParam); % faster than the above // I prefer having two different functions here as it facilitates the job somehow than combining it
 %     end
     % TFactor : ( n_t cos(theta_t) )./ ( n_i cos(theta_i) ) . This factor is
     % to account for normal incidence where n_t/n_i is the reciprocal of
@@ -182,10 +201,16 @@ Aperture= dip_image(Aperture,'sfloat') .* AMask; % Aperture+0.0;
 if any(-2:1:3==aplanar)
     pow = aplanar/2;
     Aperture(AMask) = Aperture(AMask) .* (cosalpha(AMask)).^pow;  
+elseif aplanar==10 % the 10 is just a random value for SincR
+    tanalpha=(tan(acos(cosalpha))).^2;
+    ax=ImageParam.Sampling(1).*ImageParam.Size(1);
+    az=ImageParam.Sampling(3).*ImageParam.Size(3);
+    afSinc=(ax.^2 + az.^2.*tanalpha) ./ (az.^2.*(1 + tanalpha));
+    Aperture(AMask) = Aperture(AMask) .* (cosalpha(AMask)).^(+1/2).* (afSinc(AMask)).^(-1/2); 
 else
     error('Such an aplanatic factor is not allowed.')
 end
-
+Ap=Aperture;
 FPlane=newim([sz 1 3],'scomplex');
 
 myx=ramp(sz,1)./(sz(1).*scales(1));
@@ -195,19 +220,19 @@ myphiphi = atan2(myy,myx);
 cosphi=cos(myphiphi); % phiphi(sz,'freq')
 sinphi=sin(myphiphi);
 
-% tp=1; ts=1;
+% Tp=1; Ts=1; J=1;
 
-BFPRadial=tp.*((BFPAperture(:,:,:,0).*cosphi+ BFPAperture(:,:,:,1).*sinphi)) *Aperture;
+BFPRadial=Tp.*((BFPAperture(:,:,:,0).*cosphi+ BFPAperture(:,:,:,1).*sinphi)) *Aperture;
 FPlane(:,:,:,2)=  sinalpha * BFPRadial; % Z-component of the vector 
 
-BFPTangential=ts.*((BFPAperture(:,:,:,1).*cosphi - BFPAperture(:,:,:,0).*sinphi)) *Aperture;
+BFPTangential=Ts.*((BFPAperture(:,:,:,1).*cosphi - BFPAperture(:,:,:,0).*sinphi)) *Aperture;
 RadialNew=cosalpha * BFPRadial;  % This is what is left over for the XY radial component
 
 FPlane(:,:,:,0)=  cosphi * RadialNew - sinphi * BFPTangential; % X-component of the vector 
 FPlane(:,:,:,1)=  sinphi * RadialNew + cosphi * BFPTangential; % Y-component of the vector 
 
 % Add aberrations phase
-FPlane=J.*FPlane.*exp(1i.*((ktotal.*OpticalPathDiff) - AddPhase)); % the reason why it is not needed to include ktotal anymore is .... and the negative sign is because .... (it works like this for now but the reason I am still figuring it out :D)
+FPlane=J.*FPlane.*exp(1i.*((ktotal.*OpticalPathDiff) + AddPhase)); % the reason why it is not needed to include ktotal anymore is .... and the negative sign is because .... (it works like this for now but the reason I am still figuring it out :D)
 
 end
 

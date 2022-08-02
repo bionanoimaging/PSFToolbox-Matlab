@@ -36,6 +36,7 @@ function xout = czt_1d(xin, scaled, d)
     to_fft = extract(dip_image(tofft),2.*dsize,dsize);
     fv = ft(to_fft);% is always 1d
 
+    aa=dip_image(aa);
     y = xin*reorient(aa,d);
     nsz = sz; nsz(d) = 2*sz(d); % twice the size along direction d which is along the 1st dimension since we have rotate xin
     
@@ -43,7 +44,7 @@ function xout = czt_1d(xin, scaled, d)
     ftboolean=zeros(1,length(nsz)); ftboolean(d)=1;
     g = dip_fouriertransform(dip_fouriertransform(to_fft,'forward',ftboolean).*reorient(fv,d), 'inverse', ftboolean);
     
-    oldctr = floor(sz(d)/2)- 1;  % ADD -1
+%     oldctr = floor(sz(d)/2)- 1;  % ADD -1
 
     if mod(dsize,2) == 1 % This is to deal with a strange phase shift appearing for odd-sized arrays
         extra_phase = (2*dsize - 2)/(2*dsize); % # 5: 12 / 15, 7: 12/14, 9: 16/18, 11: 20/22
@@ -53,8 +54,16 @@ function xout = czt_1d(xin, scaled, d)
     
     fak = ww(dsize:(2*dsize - 1)).* exp(1i*pi*xx(dsize,1)/scaled * extra_phase ); % is a 1d list of factors
     
-    xout = extract(g,sz,oldctr).*reorient(fak,d);
-   
+    midposg=MidPos(g); 
+    midposg2=midposg; midposg2(d)=midposg2(d)-1;
+    midposg(d)=midposg(d)/2;
+    % modification 30.07.22
+    oddsize=size(g); oddsize(d)=oddsize(d)+mod(oddsize(d)+1,2); % make the dimension along d odd
+    g2=extract(g,oddsize,midposg2);
+
+    xout = extract(g2,sz,midposg).*reorient(fak,d);
+%     xout = extract(g,sz,oldctr).*reorient(fak,d);
+    
     
     if mod(dsize,2) == 0 && scaled>1
          % set a vector positions
