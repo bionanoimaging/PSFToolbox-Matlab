@@ -50,7 +50,7 @@ if nargin < 3
     doExtend=1;
 end
 
-BorderFraction=0.25;  %0.25
+BorderFraction=0.25;  
 if doExtend
    OrigSize=ImageParam.Size;
    ImageParam.Size=ceil(ImageParam.Size .* (1+BorderFraction));
@@ -75,12 +75,12 @@ if iscell(AddPhase)
     orderlist=AddPhase; clear AddPhase
     AddPhase=ZernikePoly(orderlist,BigImageParam,PSFParam,0);
 else
-    if ~isempty(AddPhase) && size(AddPhase,1)~=1
+    if ~isempty(AddPhase) && length(size(AddPhase))
 %         if all(size2d(AddPhase)~=bigsz)
 %             AddPhase=real(ift(extract(ft(AddPhase),bigsz)));
 %             AddPhase=AddPhase./max(AddPhase);
 %         end
-    ZoomToApply=1;%+BorderFraction;
+    ZoomToApply=1+BorderFraction;
     AddPhase=ZoomPhase(AddPhase,BigImageParam,PSFParam, ZoomToApply);
     end
 end

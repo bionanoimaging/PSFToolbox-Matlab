@@ -70,18 +70,19 @@ if nargin<5 || isempty(AddPhase) %|| all(AddPhase==0)
 elseif iscell(AddPhase)
 %     switch Method
 %         case 'CZT'
-            PlusPhase = AddPhase; %
+%             PlusPhase = AddPhase; %
 %         otherwise
-%             PlusPhase = ZernikePoly(AddPhase,ZoomedImageParam,PSFParam); 
+            PlusPhase = ZernikePoly(AddPhase,ImageParam,PSFParam); 
 %     end
 else
-    switch Method
-        case 'CZT'
-            PlusPhase = []; %
-            fprintf('WARNING: Additional phase is not added. Input the Zernike polynomial instead for CZT method \n');
-        otherwise
-            PlusPhase = AddPhase;
-    end
+    PlusPhase = AddPhase; 
+%     switch Method
+%         case 'CZT'
+%             PlusPhase = []; %
+%             fprintf('WARNING: Additional phase is not added. Input the Zernike polynomial instead for CZT method \n');
+%         otherwise
+%             PlusPhase = AddPhase;
+%     end
 end
 
 if nargin < 6 
@@ -215,17 +216,18 @@ switch Method
         % Why is the Y-pol different than the X-pol??
         % add phase and Fresnel coefficients 23.08.21
         if ~isempty(AddParams) 
-%             TheoPhase =  OPDDirect(AddParams,ImageParam,PSFParam) ;
-            TheoPhase =  OPDTsp(AddParams,PSFParam,ImageParam); 
+            ktotal = 2*pi/(PSFParam.lambdaEm/AddParams.ni);
+            TheoPhase =  ktotal.*OPDTsp(AddParams,PSFParam,ImageParam); 
 %             TheoPhase = ZernPhase(AddParams,ImageParam,PSFParam,6) ;%
         else
+            AddParams.ni=PSFParam.n;
             TheoPhase = 0; 
         end
-        TotalPhase = PlusPhase - TheoPhase; % Plusphase shoud also be an array not an integer value. Otherwise it will be considered in the same way as if it is 0. 
+%         flipdim(PlusPhase,1)
+        TotalPhase = -PlusPhase + TheoPhase; % Plusphase shoud also be an array not an integer value. Otherwise it will be considered in the same way as if it is 0. 
         if any(size(TotalPhase)>1)
             RWPupil = ft3d(amp3d);%.*exp(-1i.*TotalPhase);
-            ktotal = 2*pi/(PSFParam.lambdaEm/AddParams.ni);
-            amp3d = ift3d(RWPupil.*exp(1i*ktotal*TotalPhase));
+            amp3d = ift3d(RWPupil.*exp(1i*TotalPhase));
         end
         
         % end add
@@ -242,7 +244,7 @@ switch Method
         % error('Not implemented yet.')
         [h,amp3d]=VolumePSFSim(ImageParam,PSFParam,[],1,AddParams,PlusPhase);  % calculates an extended region and cuts it
     case 'SincR'
-        PSFParam.Aplanatic=PSFParam.Aplanatic+0; % the additional aplanatic factor (+2) is to compensate for the projection of the propagator (sinc function) onto a sphere in 3D
+        PSFParam.Aplanatic=PSFParam.Aplanatic+2; % the additional aplanatic factor (+2) is to compensate for the projection of the propagator (sinc function) onto a sphere in 3D
 %         PSFParam.Aplanatic=10;
         [h,amp3d]=mPSFSimSincR(ImageParam,PSFParam,1,AddParams,PlusPhase);  %  calculates an extended region and cuts it out // older version is PSFSimSincR
     case 'GibsonLanni' % based on MicroscopePSF from other group.
