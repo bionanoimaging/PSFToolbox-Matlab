@@ -130,7 +130,7 @@ if nargin < 4 || isempty(ZoomedPupil) || norm(size2d(ZoomedPupil)-TargetSize)~=0
         UpdatedPhase=ZernikePoly(AddPhase,ZoomedImageParam,PSFParam); 
     end
     % AddPhase end---------------------------------------------------------
-    ZoomedPupil=ZoomedPupil.*exp(1i*UpdatedPhase);
+    ZoomedPupil=ZoomedPupil.*exp(-1i*UpdatedPhase);
 end
 
 % apply the propagator

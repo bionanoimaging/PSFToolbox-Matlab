@@ -43,7 +43,7 @@
 % This is a modified version of SimLens [edit: 23.08.21 - R. Dina]
 % Aberration due to refractive index mismatch is included
 %_________________________________________________________________________
-function [FPlane,OpticalPathDiff,Ap,kxyz]=mSimLens(BFPAperture,lambdaNA,scales,aplanar,smoothAperture,AddParams,AddPhase)
+function [FPlane,OpticalPathDiff,Ap,kz]=mSimLens(BFPAperture,lambdaNA,scales,aplanar,smoothAperture,AddParams,AddPhase)
 if nargin < 7 || isempty(AddPhase)
     AddPhase=0;
 end
@@ -150,8 +150,6 @@ else
     J=1;
 end
 
-kxyz.kxysqr=kxysqr;
-kxyz.kzsqr=kzsqr;
 
 HardAperture= kxysqr/ktotalsqr < NA*NA;
 if (smoothAperture)
@@ -175,7 +173,10 @@ sinalpha=sqrt(kxysqr)./ktotal;
     
 % calculate the transmission coefficients and optical path difference if there are interfaces
 if ~isempty(AddParams) && isstruct(AddParams)
-        [OpticalPathDiff, Tp, Ts]=OPDTsp(AddParams,PSFParam,ImageParam); % 
+%         [OpticalPathDiff, Tp, Ts]=OPDTsp(AddParams,PSFParam,ImageParam); % 
+        OpticalPathDiff=OPDTsp(AddParams,PSFParam,ImageParam); % 
+        Tp=1;
+        Ts=1;
         if isfield(AddParams,'OPD') % we only need the Tp and Ts values but we already have the phase covered
 %             if AddParams.OPD~=1
                 OpticalPathDiff=0;
