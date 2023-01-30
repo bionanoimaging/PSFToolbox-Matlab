@@ -173,10 +173,7 @@ sinalpha=sqrt(kxysqr)./ktotal;
     
 % calculate the transmission coefficients and optical path difference if there are interfaces
 if ~isempty(AddParams) && isstruct(AddParams)
-%         [OpticalPathDiff, Tp, Ts]=OPDTsp(AddParams,PSFParam,ImageParam); % 
-        OpticalPathDiff=OPDTsp(AddParams,PSFParam,ImageParam); % 
-        Tp=1;
-        Ts=1;
+        [OpticalPathDiff, Tp, Ts]=OPDTsp(AddParams,PSFParam,ImageParam); % 
         if isfield(AddParams,'OPD') % we only need the Tp and Ts values but we already have the phase covered
 %             if AddParams.OPD~=1
                 OpticalPathDiff=0;

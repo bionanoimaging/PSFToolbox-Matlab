@@ -30,6 +30,9 @@ function [h,amp3d]=SlicePSFSim(ImageParam,PSFParam,AddParams,AddPhase)
 if nargin<4 || isempty(AddPhase)
     AddPhase=0;
 end
+if iscell(AddPhase)
+    AddPhase=ZernikePoly(AddPhase,ImageParam,PSFParam);
+end
 if nargin<3 || isempty(AddParams)
     AddParams=[];
 end

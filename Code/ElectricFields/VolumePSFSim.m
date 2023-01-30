@@ -33,6 +33,9 @@ function [h,amp3d]=VolumePSFSim(ImageParam,PSFParam,InputAmp,doExtend,AddParams,
 if nargin<6 || isempty(AddPhase)
     AddPhase=0;
 end
+if iscell(AddPhase)
+    AddPhase=ZernikePoly(AddPhase,ImageParam,PSFParam);
+end
 
 % if nargin<5 || isempty(AddParams)
 %     AddParams=[];
