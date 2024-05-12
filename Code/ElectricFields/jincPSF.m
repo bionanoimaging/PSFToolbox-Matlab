@@ -22,5 +22,5 @@ lambda=(PSFParam.lambdaEm./PSFParam.n)./ImageParam.Sampling(1:2); % the waveleng
 na=min(PSFParam.NA./ndes, PSFParam.NA./PSFParam.n); % the opening aperture is defined by the minimum of how it was designed by the manufacturer or the available given by the imaging condition
 AbbeLimit=lambda/na;   % coherent Abbe limit, central illumination, not incoherent
 ftradius=ImageParam.Size(1:2)./AbbeLimit;
-myscales=ftradius./ImageParam.Size(1:2); % [100 100]/(488/0.3);
+myscales=ftradius./ImageParam.Size(1:2); % [100 100]/(488/0. 3);
 res=jinc(ImageParam.Size(1:2),myscales);  % Airy disc

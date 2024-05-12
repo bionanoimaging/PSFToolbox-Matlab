@@ -58,7 +58,7 @@ if isempty(PupilInterpolators) || ~isfield(PupilInterpolators,'kernelSize') || ~
     ImageParam=struct('Sampling',PupilInterpolators.pixelsize,'Size',imgsize);
     PSFParam=struct('NA',PupilInterpolators.NA,'n',PupilInterpolators.RI,'MinOtf',1.2e-3,'lambdaEm',PupilInterpolators.lambda);
     InputPol=newim([ImageParam.Size(1:2),1,2],'scomplex');
-    InputPol(:,:,:,0)=sqrt(0.5);InputPol(:,:,:,1)=i*sqrt(0.5);   % Makes it circular polarisation (or also == random)
+    InputPol(:,:,:,0)=sqrt(0.5);InputPol(:,:,:,1)=1i*sqrt(0.5);   % Makes it circular polarisation (or also == random)
     lambdaMedium=PSFParam.lambdaEm/PSFParam.n;
 %     naAir=(1.0+3*PSFParam.NA/PSFParam.n)/4; % naAir=PSFParam.NA/PSFParam.n;  % This is set to one, as the jinc function will take care of this in a better way
 %     FPlane=SimLens(InputPol,lambdaMedium,ImageParam.Sampling(1:2),naAir,-1);  % Circular input polarisation, no aplanatic factor, as this is included in the 3D aperture projection method
@@ -67,8 +67,9 @@ if isempty(PupilInterpolators) || ~isfield(PupilInterpolators,'kernelSize') || ~
         PupilInterpolators.ndes=PSFParam.n; 
     end
     naAir=(1.0+3*PSFParam.NA/PupilInterpolators.ndes)/4; % naAir=PSFParam.NA/PSFParam.n;  % This is set to one, as the jinc function will take care of this in a better way
-    FPlane= mSimLens(InputPol,[lambdaMedium naAir],ImageParam.Sampling(1:2),0);  % Circular input polarisation, no aplanatic factor and no Fresnel or additional phases, as this is included in the 3D aperture projection method
-  
+    % FPlane= mSimLens(InputPol,[lambdaMedium naAir],ImageParam.Sampling(1:2),0);  % Circular input polarisation, no aplanatic factor and no Fresnel or additional phases, as this is included in the 3D aperture projection method
+    FPlane= mSimLens(InputPol,[lambdaMedium naAir],ImageParam,-1); % edit 28/07/23 % Circular input polarisation, no aplanatic factor and no Fresnel or additional phases, as this is included in the 3D aperture projection method
+
     PupilInterpolators.Aperture=FPlane .* ft(jincPSF(ImageParam,PSFParam));  % This aperture contains the vectorial effects and the necessary interpolation at the edges of the pupil to avoid stripes
     PupilInterpolators.Aperture=PupilInterpolators.Aperture / abs(PupilInterpolators.Aperture(MidPosX(PupilInterpolators.Aperture),MidPosY(PupilInterpolators.Aperture),:,0));
     if exist('enableCuda')

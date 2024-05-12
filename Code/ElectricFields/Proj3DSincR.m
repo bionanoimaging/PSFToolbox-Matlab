@@ -49,9 +49,24 @@ function [amp3d,h]=Proj3DSincR(ImageParam,PSFParam,FPlane,BorderRegion)
         MZ=MidPosZ(ftAmp);
         res=newim(ftAmp,'complex');
         if MZ*2==size(ftAmp,3)
-            AliasMask = LocalKZ >  MZ-1;
+%             AliasMask = LocalKZ >  MZ-1;
+%             res(:,:,0:MZ-1)=ftAmp(:,:,MZ:end)*~AliasMask;
+%             res(:,:,MZ:end)=ftAmp(:,:,0:MZ-1)*AliasMask;
+%             ftAmp=res;
+%             ftAmp(:,:,MZ)=res(:,:,MZ)/2;
+%             ftAmp(:,:,0)=res(:,:,0)*2;
+
+            % Edit Dina 16.03.23
+            AliasMask = LocalKZ >  MZ;
+%             rad=find(radialmean(AliasMask)==0,1)-1; % finding the radius of the mask
+%             myscales=rad./ImageParam.Size(1:2); % [100 100]/(488/0.3);
+%             AiryDisc=jinc(ImageParam.Size(1:2),myscales);  % Airy disc
+%             JincAliasMask=real(ft(AiryDisc));
+%             JincAliasMask=JincAliasMask./max(JincAliasMask); % normalize by the max
+%             JincAliasMask(JincAliasMask<0)=0;
             res(:,:,0:MZ-1)=ftAmp(:,:,MZ:end)*~AliasMask;
             res(:,:,MZ:end)=ftAmp(:,:,0:MZ-1)*AliasMask;
+            res=res(:,:,end:-1:0);
             ftAmp=res;
             ftAmp(:,:,MZ)=res(:,:,MZ)/2;
             ftAmp(:,:,0)=res(:,:,0)*2;

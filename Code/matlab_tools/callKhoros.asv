@@ -50,10 +50,8 @@ for ii=1:length(in)
    if isstr(in{ii})
      fn_in{ii} = in{ii};
    else
-     %fn_in{ii}= [td 'xxx'];           
-     % MODIF: add double quotes around file names to handle filename
-     % with special characterrs (space)
-     fn_in{ii}= ['"' td  'MatlabKhoros_in_' sysid '.' num2str(ii) '"'];
+     %fn_in{ii}= [td 'xxx']; 
+     fn_in{ii}= [td  'MatlabKhoros_in_' sysid '.' num2str(ii)];
    end
 end
 
@@ -65,9 +63,8 @@ if ~strcmp(arglist{ii,1},'')
    if isstr(arglist{ii,2})
       if strcmp(arglist{ii,2},'OK_out')
          no = no+1;
-         % MODIF: add double quotes around file names to handle filename
-         % with special characterrs (space)
-         fn_out{no}= ['"' td  'MatlabKhoros_out_' sysid '.' num2str(no) '"'];
+         % add double quotes around file names
+         fn_out{no}= ['"' td  'MatlabKhoros_out_' sysid '.' num2str(no)];
          %fn_out{no}= [td  'xxx'];
          kh = [kh '-' arglist{ii,1} ' ' fn_out{no} ' '];
          
@@ -121,9 +118,6 @@ end
 
 for ii=1:no
    %varargout{ii} =1;
-   % MODIF: remove the double quote that we previously added around the 
-   % filename.
-   fn_out{ii} = strip(fn_out{ii},'"');
    varargout{ii}=readkhoros(fn_out{ii});
    if ispc
    system(['del ' fn_out{ii}]);

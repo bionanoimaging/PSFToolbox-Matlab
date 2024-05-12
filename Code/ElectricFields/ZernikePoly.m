@@ -51,7 +51,7 @@ else
 
     rho=rrscale(ImageParam.Size(1:2), 1.0 ./ PupilRadius);
     rmsk=rho>1.0;
-    rho(rmsk)=0.0;  % limit the radius to one. THIS IS PHASE! Not amplitude.
+    rho(rmsk)=0.0;  % limit the radius to o ne. THIS IS PHASE! Not amplitude.
 end
 myxx = xx(origSZ)./PupilRadius(1);  % to get a valid coordinate system in Fourier space
 myyy = yy(origSZ)./PupilRadius(2);
@@ -62,7 +62,7 @@ if Option==0
 else
     phse=[];
 end
-for abnb=1:max(size(orderlist))%size(orderlist,1)  % iterate through the list of aberrations
+for abnb=1:length(orderlist)%size(orderlist,1)  % iterate through the list of aberrations
     order=orderlist{abnb};
  
     if length(order)<4

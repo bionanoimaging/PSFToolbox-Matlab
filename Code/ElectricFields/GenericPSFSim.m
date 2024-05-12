@@ -22,7 +22,7 @@
 %       'SincR' :  Creates the Fourier shell by a 3D FFT of a sinc(abs(R))
 %       function and modifies it from there on [4].
 %  AddParams: structure having as fields
-%                       e.g. AddParams=struct('ns',1.33,'ng',1.518,'ni',1.516,'ts',2e3,'tg',1.7e5,'tg0',1.7e5,'wd',1.5e5); 
+%                       e.g. AddParams=struct('ns',1.33,'ng',1.518,'ni',1.516,'ni0',1.518,'ng0',1.518,'ts',2e3,'tg',1.7e5,'tg0',1.7e5,'wd',1.5e5); 
 %                         'ns': ri of sample, can be in a vector format if the sample is in a stratified medium.  First element of ns (if a vector) is the ri of where the emitter is at, it is the ri of the medium which the furthest from the coverslip. The last element of the vector is the ri of the medium closest to the coverslip
 %                         'ng': ri of coverslip in real condition
 %                         'ni': ri of immersion medium in real condition

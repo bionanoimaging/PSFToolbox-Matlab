@@ -49,7 +49,7 @@ if nargin < 7 || isempty(AddPhase)
 end
 
 if nargin < 5
-    smoothAperture=0;
+    smoothAperture=1;
 end
 if isstruct(lambdaNA)  % to enable the alternate usage
     PSFParam=lambdaNA;
@@ -70,6 +70,19 @@ elseif isvector(lambdaNA) % lamba is a vector containg as first element the emis
     elseif length(lambdaNA)==3
         PSFParam.n=lambdaNA(3);
     end
+    % added on 28/07/23
+    if isstruct(scales)
+       ImageParam=scales;
+       scales=ImageParam.Sampling;
+    else
+        ImageParam.Sampling=scales;
+        if ~isempty(BFPAperture)
+            ImageParam.Size=size(BFPAperture);
+        else
+            ImageParam.Size=[256 256 1];
+        end
+    end
+    % end addition
 end
 
 if isfield(PSFParam,'Aplanatic')
@@ -155,9 +168,9 @@ HardAperture= kxysqr/ktotalsqr < NA*NA;
 if (smoothAperture)
 %         PSFParamAp=PSFParam; PSFParamAp.NA=NA; % define properly the amount of light going through the system
         jpsf=jincPSF(ImageParam,PSFParam,ndes); % n defines in PSFParam corresponds to the ri of the medium through which light propagates in reality and ndes defines the ri of the medium through which the medium is supposed to propagate as described by the manufacturer
-    if smoothAperture>1  % means: Do Damping
+    % if smoothAperture>1  % means: Do Damping
         jpsf=DampEdge(jpsf,0.05,2,1,3);
-    end
+    % end
     Aperture= real(ft(jpsf));  % force it to be real
 else
     Aperture= HardAperture;
