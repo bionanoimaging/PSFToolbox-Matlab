@@ -50,13 +50,13 @@ This corresponds to the aplanatic correction applied in the pupil plane. For the
 * 'tg0': thickness of the coverslip in design condition. <br>
 * 'wd': working distance which is supposed to be the thickness of the immersion medium in design condition. <br>
 
+The Sampling, thicknesses and wavelengths must be in the same units.
+
 If AddParams is empty i.e. AddParams == [] or not added to the function, the code will run as with the assumption that there is no interfaces with different refractive index mismatches yielding to aberrations into the system. In this case, the refractive index that is input in the dictionary PSFParam will be used troughout the calculation as the ri of the medium in which light is propagating. <br>
 
 Example of usage: AddParams = struct('ns', 1.33, 'ng', 1.518, 'ni', 1.516, 'ni0', 1.518, 'ng0', 1.518, 'ts', 2e3, 'tg', 1.7e5, 'tg0', 1.7e5, 'wd', 1.5e5); <br>
 
-> <font color='blue'>AddPhase</font> : additional phase that can be added into the function. In Method = 'ZoomedPupilProp', it is prefereable to have this AddPhase variable as a cell for computing the ZernikePoly instead while it can only be in 2D image for the other methods. 
-  
-The Sampling, thicknesses and wavelengths must be in the same units.
+> <font color='blue'>AddPhase</font> : additional 2D extra phase that can be added into the function. 
 
 ### OUTPUT <br>
 <font color='blue'>h</font>: resulting intensity PSF <br>
