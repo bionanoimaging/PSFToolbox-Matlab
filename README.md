@@ -78,4 +78,4 @@ AddParams = struct('ns', 1.33, 'ng', 1.518, 'ni', 1.518, 'ng0', 1.518, 'ni0', 1.
 
 [3] Rabiner L, Schafer RW, Rader C. The chirp z-transform algorithm. IEEE transactions on audio and electroacoustics. 1969 Jun;17(2):86-92.
   
-[4] Miora RH, Rohwer E, Kielhorn M, Sheppard CJ, Bosman G, Heintzmann R. Calculating point spread functions: Methods, pitfalls and solutions. arXiv preprint arXiv:2301.13515. 2023 Jan 31.
+[4] Miora RH, Rohwer E, Kielhorn M, Sheppard CJ, Bosman G, Heintzmann R. Calculating point spread functions: Methods, pitfalls and solutions. arXiv preprint arXiv:2301.13515v2. 2024 March 10.
