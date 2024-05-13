@@ -24,8 +24,7 @@ The main function for computing the PSF is called GenericPSFSim. It takes the fo
 * Size : window size along x, y and, z  <br>
 
 > <font color='blue'>PSFParam</font>: a structure containing the following minimum fields: <br>
-* polarization = 'circular';  % default if not mentionned in the structure <br>
-* polarization = 'linearX' or 'linearY' or 'radial' or 'azimuthal'; % are other options <br>
+* polarization : polarization state of the field. It can take as an input integers 'linearX' or 'linearY' or 'radial' or 'azimuthal' or 'circular'. The default polarization stated is assumed to be 'circular' if not mentionned <br>
 * Aplanatic : value can be $`\beta = -1, 0`$, or 1 <br>
 This corresponds to the aplanatic correction applied in the pupil plane. For the correction, the pupil plane is multiplied by $`cos^{\beta/2}(\theta)`$, $`\beta`$ being the input argument in the Aplanatic and $`\theta`$ is the opening or elevation angle of the beam. A value of $`\beta = 0`$ means there is no aplanatic correction applied onto the field. By default, $`\beta = -1`$ <br>
 * NA : numerical aperture of the objective lens <br>
@@ -33,28 +32,27 @@ This corresponds to the aplanatic correction applied in the pupil plane. For the
 * lambdaEm : emission wavelength <br>
 
 > <font color='blue'>Method</font>: a string for selecting the method to use in the simulation. Choices are: <br>
-- 'RichardsWolff' (default): Using the method from the Richards & Wolff paper [1, 2]. <br>
+- 'RichardsWolff' (default): Using the method from the Richards & Wolff paper to generate the electric field as well as the image intensity [1, 2]. <br>
 - 'RichardsWolffInt' : A fast method, if only the intensity is needed [1, 2]. <br>
-- 'RWFast': Reworked Richards & Wolf bast on an chirp-Z transform along kz [3, 4]. <br>
-- 'SlicePropagation' : Simulates the in-plane ATF based on FFTs and the jinc function and propagates it to all planes [4]. <br>
-- 'CZT' chirped-Z transform-based (== Zoomed FFT) method avoiding the out-of-focus wrap-around problems of SlicePropagation [3, 4]. <br>
-- 'VolumeShell' : Creates a part of the McCutchen Pupil directly in Fourier space using pre-computed Fourier-space interpolators. <br>
-Pretty good in the central region of the PSF but (intentionally) degrading near the edge of the volume [4]. <br>
-- 'SincR' :  Creates the Fourier shell by a 3D FFT of a sinc(abs(R)) <br>
-        function and modifies it from there on [4]. <br>
+- 'RWFast': Reworked Richards & Wolf bast on an chirp-Z transform along kz [3, 4]. This method is still under revision. <br>
+- 'SlicePropagation' : uses the angular spectrum method to propagate the field from the in-plane amplitude transfer function (ATF) using a fast Fourier transform (FFT). A jinc function is used to simulate a smooth aperture to reduce Fourier artefacts [4]. <br>
+- 'CZT' : a chirped-Z transform-based (== Zoomed FFT) method to avoid the out-of-focus wrap-around problems of SlicePropagation [3, 4]. <br>
+- 'VolumeShell' : this creates a part of the McCutchen Pupil directly in Fourier space using pre-computed Fourier-space interpolators which is pretty good in the central region of the PSF but (intentionally) degrading near the edge of the volume [4]. <br>
+- 'SincR' :  this creates the Fourier shell by a 3D FFT of a sinc(abs(R)) <br>
 
-> <font color='blue'>AddParams</font>: structure having as fields <br>
-e.g. AddParams=struct('ns',1.33,'ng',1.518,'ni',1.516,'ni0',1.518,'ng0',1.518,'ts',2e3,'tg',1.7e5,'tg0',1.7e5,'wd',1.5e5); <br>
-* 'ns': ri of sample, can be in a vector format if the sample is in a stratified medium.  First element of ns (if a vector) is the ri of where the emitter is at, 
-it is the ri of the medium which the furthest from the coverslip. The last element of the vector is the ri of the medium closest to the coverslip <br>
-* 'ng': ri of coverslip in real condition <br>
-* 'ni': ri of immersion medium in real condition <br>
-* 'ni0': ri of immersion medium in design condition <br>
+> <font color='blue'>AddParams</font>: a structure with the details on the refractive indices and thickeness of each layer in the system <br>
+* 'ns': refractive index (ri) of the sample. If the sample is a stratified medium, value attributed to this variable can be in a vector format listing the refractive index of each layer such that the first element is the ri of where the emitter is at i.e. the the ri of the layer furtherst away from the coverslip. The last element of the vector is the ri of the medium closest to the coverslip. <br>
+* 'ng': ri of the coverslip in real condition. <br>
+* 'ni': ri of the immersion medium in real condition. <br>
+* 'ni0': ri of the immersion medium in design condition. <br>
 * 'ts': thickness of the sample or position where the emitter is at, this should be with the same length as the vector of ns and within the same order as ns. <br>
-* 'tg': thickness of coverslip in real condition <br>
-* 'tg0': thickness of coverslip in design condition <br>
-* 'wd': working distance which is supposed to be the thickness of the immersion medium in design condition <br>
-NB: If AddParams == [] or not added to the function, the code will run as there is no interfaces and no aberrations due to that, n = PSFParam.n will be used troughout the calculation in this case. <br>
+* 'tg': thickness of the coverslip in real condition. <br>
+* 'tg0': thickness of the coverslip in design condition. <br>
+* 'wd': working distance which is supposed to be the thickness of the immersion medium in design condition. <br>
+
+If AddParams is empty i.e. AddParams == [] or not added to the function, the code will run as with the assumption that there is no interfaces with different refractive index mismatches yielding to aberrations into the system. In this case, the refractive index that is input in the dictionary PSFParam will be used troughout the calculation as the ri of the medium in which light is propagating. <br>
+
+Example of usage: AddParams = struct('ns', 1.33, 'ng', 1.518, 'ni', 1.516, 'ni0', 1.518, 'ng0', 1.518, 'ts', 2e3, 'tg', 1.7e5, 'tg0', 1.7e5, 'wd', 1.5e5); <br>
 
 > <font color='blue'>AddPhase</font> : additional phase that can be added into the function. In Method = 'ZoomedPupilProp', it is prefereable to have this AddPhase variable as a cell for computing the ZernikePoly instead while it can only be in 2D image for the other methods. 
   
