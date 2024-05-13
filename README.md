@@ -45,15 +45,15 @@ Pretty good in the central region of the PSF but (intentionally) degrading near 
 
 > <font color='blue'>AddParams</font>: structure having as fields <br>
 e.g. AddParams=struct('ns',1.33,'ng',1.518,'ni',1.516,'ni0',1.518,'ng0',1.518,'ts',2e3,'tg',1.7e5,'tg0',1.7e5,'wd',1.5e5); <br>
-** 'ns': ri of sample, can be in a vector format if the sample is in a stratified medium.  First element of ns (if a vector) is the ri of where the emitter is at, 
+* 'ns': ri of sample, can be in a vector format if the sample is in a stratified medium.  First element of ns (if a vector) is the ri of where the emitter is at, 
 it is the ri of the medium which the furthest from the coverslip. The last element of the vector is the ri of the medium closest to the coverslip <br>
-** 'ng': ri of coverslip in real condition <br>
-** 'ni': ri of immersion medium in real condition <br>
-** 'ni0': ri of immersion medium in design condition <br>
-** 'ts': thickness of the sample or position where the emitter is at, this should be with the same length as the vector of ns and within the same order as ns. <br>
-** 'tg': thickness of coverslip in real condition <br>
-** 'tg0': thickness of coverslip in design condition <br>
-** 'wd': working distance which is supposed to be the thickness of the immersion medium in design condition <br>
+* 'ng': ri of coverslip in real condition <br>
+* 'ni': ri of immersion medium in real condition <br>
+* 'ni0': ri of immersion medium in design condition <br>
+* 'ts': thickness of the sample or position where the emitter is at, this should be with the same length as the vector of ns and within the same order as ns. <br>
+* 'tg': thickness of coverslip in real condition <br>
+* 'tg0': thickness of coverslip in design condition <br>
+* 'wd': working distance which is supposed to be the thickness of the immersion medium in design condition <br>
 NB: If AddParams == [] or not added to the function, the code will run as there is no interfaces and no aberrations due to that, n = PSFParam.n will be used troughout the calculation in this case. <br>
 
 > <font color='blue'>AddPhase</font> : additional phase that can be added into the function. In Method = 'ZoomedPupilProp', it is prefereable to have this AddPhase variable as a cell for computing the ZernikePoly instead while it can only be in 2D image for the other methods. 
